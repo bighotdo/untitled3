@@ -12,9 +12,11 @@ namespace HashTable{
         void setBusy(int busy);
         void setKey(int key);
         void setInfo(char *info);
-
+        Element(const Element & ob);
+        Element & operator = (const Element& ob);
+        ~Element();
     private:
-        char* info;
+        char *info;
         int busy;
         int key;
     };
@@ -26,17 +28,17 @@ namespace HashTable{
         friend HashMap& operator+= (HashMap  &Hashmap, Element &Element);
         friend HashMap& operator-= (HashMap  &Hashmap, int key);
     public:
-
         HashMap();
-        explicit HashMap(Element *HashMap);
-        int hash(int key);
-        void trashCollect();
+        HashMap(Element& Element);//Single-argument constructors must be marked explicit to avoid unintentional implicit conversions
+        HashMap(const HashMap & ob);
+        ~HashMap();
+        static int hash(int key);
+        void trashCollect() const;
         char* operator[] (int index);
         Element operator() (int index);
-
-
+        HashMap & operator = (const HashMap& ob);// оператор присваивания
     private:
-        Element * array;
-        const int capacity = 10;
+        int capacity;
+        Element *array;
     };
 }

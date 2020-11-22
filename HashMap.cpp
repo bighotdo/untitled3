@@ -4,14 +4,16 @@
 namespace HashTable {
 const char INFO[10] = {0,0,0,0,0,0,0,0,0,0};
 
-    Element::Element() {
+    Element::Element():info(nullptr)  {
         this->busy = 0;
+        this->info = new char [10];
         strcpy(this->info,INFO);
         this->key = 0;
     }
 
-    Element::Element(int key, char info[]) {
+    Element::Element(int key, char info[]):info(nullptr) {
         this->busy = 1;
+        this->info = new char [strlen(info)];
         strcpy(this->info,info);
         this->key = key;
     }
@@ -31,20 +33,19 @@ const char INFO[10] = {0,0,0,0,0,0,0,0,0,0};
     }
 
 
-    HashMap::HashMap()  {
-        for (auto & i : this->array)
-            i = Element();
+    HashMap::HashMap():array(nullptr){
+        array = new Element[10];
+        capacity = 10;
+        for(int i = 0; i < 10; i++)
+            array[i] = Element();
     }
 
-    HashMap::HashMap(Element *HashMap) {
-        for (int i = 0; i < 10; ++i)
-            this->array[i] = HashMap[i];
-    }
+
 
 
     std::ostream& operator<<(std::ostream& out, HashMap& HashMap) {
-        for (auto & i : HashMap.array) {
-            out << i;
+        for (int i = 0; i < 10; ++i) {
+            out << HashMap.array[i];
         }
         return out;
     }
@@ -74,11 +75,37 @@ const char INFO[10] = {0,0,0,0,0,0,0,0,0,0};
         key = a;
     }
 
-    void Element::setInfo(char *info) {
+    void Element::setInfo(char *info) {//Declaration shadows a field of 'HashTable::Element'
         strcpy(this->info,info);
     }
 
-    void HashMap::trashCollect() {
+    Element::~Element() {
+        if(info != nullptr) {
+            delete[]info;
+            info = nullptr;
+        }
+    }
+
+    Element::Element(const Element &ob) {
+        if(strlen(ob.info)){
+            info = new char[strlen(ob.info)];
+            busy = ob.busy;
+            key = ob.key;
+            strcpy(info,ob.info);
+        }
+    }
+
+    Element &Element::operator = (const Element &ob) {
+        if(this != &ob) {
+            delete[] info;
+            info = nullptr;
+            info = new char[strlen(ob.info)];
+            strcpy(info,ob.info);
+        }
+        return *this;
+    }
+
+    void HashMap::trashCollect() const {
         int i = 0, j;
         while (i < this->capacity) {
             if (this->array[i].getBusy() != -1) {}
@@ -181,5 +208,41 @@ const char INFO[10] = {0,0,0,0,0,0,0,0,0,0};
         return Hashmap;
     }
 
+    HashMap::~HashMap() {
 
+    }
+
+    HashMap::HashMap(const HashMap &ob):capacity(ob.capacity),array(nullptr) {
+        if(capacity){
+            array = new Element[capacity];
+            for (int i = 0; i < capacity; i++) {
+                array[i].setKey(ob.array[i].getKey());
+                array[i].setInfo(ob.array[i].getInfo());
+                array[i].setBusy(ob.array[i].getBusy());
+            }
+        }
+    }
+
+    HashMap &HashMap::operator = (const HashMap &ob) {
+        if(this != &ob) {
+            delete[] array;
+            array = nullptr;
+            if((capacity = ob.capacity) != 0) {
+                array = new Element[capacity];
+                for (int i = 0; i < capacity; i++) {
+                    array[i].setKey(ob.array[i].getKey());
+                    array[i].setInfo(ob.array[i].getInfo());
+                    array[i].setBusy(ob.array[i].getBusy());
+                }
+            }
+        }
+        return *this;
+    }
+
+    HashMap::HashMap(Element &Element):array(nullptr) {
+            capacity = 1;
+            array = new class Element[1];
+            array->setKey(Element.getKey());
+            array->setBusy(1);
+    }
 }
